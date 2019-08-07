@@ -1,0 +1,17 @@
+COMPILER Bool $CN
+
+CHARACTERS
+  assignments = "abcdefgxyz" .
+
+TOKENS
+  Booleans    =    "true" | "false"  .
+  Exp         = assignments.
+IGNORE CHR(0) .. CHR(31)
+
+PRODUCTIONS
+  Bool       = {Exp  "=" Expression ";"}  EOF .
+  Expression = Term { "or" Term | "||" Term | "OR" Term} .  
+  Term       = Term2 { "and" Term2 | "&&" Term2 | "AND" Term2} .
+  Term2      = {"!" |"not"} Factor { "!" Factor | "not" Factor  | "!" "not" Factor} .
+  Factor     = Booleans {Expression} | Exp { Expression }| "("  { Expression } ")" . 
+END Bool. 
