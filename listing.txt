@@ -1,10 +1,8 @@
 
    1   void Main () {
-   2     int i;
-   3     ++i;
-   4     --i;
-   5     i++;
-   6     i--;
-   7   } // Main
+   2     set s = s + new set[12];
+****               ^ ";" expected
+   3     set[] set = new set[127];
+   4   } // Main
 
-0 errors detected
+1 errors detected
