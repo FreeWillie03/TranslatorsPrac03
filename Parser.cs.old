@@ -164,6 +164,8 @@ public class Parser {
 			Block();
 		} else if (la.kind == semicolon_Sym) {
 			Get();
+		} else if (la.kind == identifier_Sym || la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
+			Designator2();
 		} else if (la.kind == const_Sym) {
 			ConstDeclarations();
 		} else if (StartOf(2)) {
@@ -182,9 +184,26 @@ public class Parser {
 			ReadStatement();
 		} else if (la.kind == write_Sym) {
 			WriteStatement();
-		} else if (la.kind == identifier_Sym || la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
-			Designator2();
 		} else SynErr(45);
+	}
+
+	static void Designator2() {
+		if (la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
+			if (la.kind == plusplus_Sym) {
+				Get();
+			} else {
+				Get();
+			}
+			Designator();
+		} else if (la.kind == identifier_Sym) {
+			Designator();
+			if (la.kind == plusplus_Sym) {
+				Get();
+			} else if (la.kind == minusminus_Sym) {
+				Get();
+			} else SynErr(46);
+		} else SynErr(47);
+		Expect(semicolon_Sym);
 	}
 
 	static void ConstDeclarations() {
@@ -264,39 +283,6 @@ public class Parser {
 		Expect(semicolon_Sym);
 	}
 
-	static void Designator2() {
-		if (la.kind == identifier_Sym || la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
-			if (la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
-				if (la.kind == plusplus_Sym) {
-					Get();
-				} else {
-					Get();
-				}
-			}
-			Expect(identifier_Sym);
-			if (la.kind == lbrack_Sym) {
-				Get();
-				Expression();
-				Expect(rbrack_Sym);
-			}
-		} else if (la.kind == identifier_Sym) {
-			Get();
-			if (la.kind == lbrack_Sym) {
-				Get();
-				Expression();
-				Expect(rbrack_Sym);
-			}
-			if (la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
-				if (la.kind == plusplus_Sym) {
-					Get();
-				} else {
-					Get();
-				}
-			}
-		} else SynErr(46);
-		Expect(semicolon_Sym);
-	}
-
 	static void OneConst() {
 		Expect(identifier_Sym);
 		Expect(equal_Sym);
@@ -314,7 +300,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == null_Sym) {
 			Get();
-		} else SynErr(47);
+		} else SynErr(48);
 	}
 
 	static void Type() {
@@ -358,7 +344,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == identifier_Sym) {
 			Designator();
-		} else SynErr(48);
+		} else SynErr(49);
 	}
 
 	static void WriteElement() {
@@ -366,7 +352,7 @@ public class Parser {
 			Get();
 		} else if (StartOf(4)) {
 			Expression();
-		} else SynErr(49);
+		} else SynErr(50);
 	}
 
 	static void AddExp() {
@@ -410,7 +396,7 @@ public class Parser {
 			Get();
 			break;
 		}
-		default: SynErr(50); break;
+		default: SynErr(51); break;
 		}
 	}
 
@@ -429,7 +415,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == barbar_Sym) {
 			Get();
-		} else SynErr(51);
+		} else SynErr(52);
 	}
 
 	static void Factor() {
@@ -450,7 +436,7 @@ public class Parser {
 			Get();
 			Expression();
 			Expect(rparen_Sym);
-		} else SynErr(52);
+		} else SynErr(53);
 	}
 
 	static void MulOp() {
@@ -460,7 +446,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == andand_Sym) {
 			Get();
-		} else SynErr(53);
+		} else SynErr(54);
 	}
 
 	static void BasicType() {
@@ -469,7 +455,7 @@ public class Parser {
 		} else if (la.kind == bool_Sym) {
 			Get();
 		} else if (la.kind == identifier_Sym || la.kind == lbrack_Sym || la.kind == lbrackrbrack_Sym) {
-		} else SynErr(54);
+		} else SynErr(55);
 	}
 
 
@@ -648,14 +634,15 @@ public class Errors {
 			case 44: s = "??? expected"; break;
 			case 45: s = "invalid Statement"; break;
 			case 46: s = "invalid Designator2"; break;
-			case 47: s = "invalid Constant"; break;
-			case 48: s = "invalid ReadElement"; break;
-			case 49: s = "invalid WriteElement"; break;
-			case 50: s = "invalid RelOp"; break;
-			case 51: s = "invalid AddOp"; break;
-			case 52: s = "invalid Factor"; break;
-			case 53: s = "invalid MulOp"; break;
-			case 54: s = "invalid BasicType"; break;
+			case 47: s = "invalid Designator2"; break;
+			case 48: s = "invalid Constant"; break;
+			case 49: s = "invalid ReadElement"; break;
+			case 50: s = "invalid WriteElement"; break;
+			case 51: s = "invalid RelOp"; break;
+			case 52: s = "invalid AddOp"; break;
+			case 53: s = "invalid Factor"; break;
+			case 54: s = "invalid MulOp"; break;
+			case 55: s = "invalid BasicType"; break;
 
 			default: s = "error " + n; break;
 		}

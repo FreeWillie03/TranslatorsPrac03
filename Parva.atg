@@ -28,10 +28,10 @@
     Parva             = "void" identifier "(" ")" Block .
     Block             = "{" { Statement } "}" .
     Statement         =   Block | ";"
-                        | ConstDeclarations | VarDeclarations
+                        | Designator2 | ConstDeclarations | VarDeclarations
                         | Assignment | IfStatement | WhileStatement
                         | ReturnStatement | HaltStatement
-                        | ReadStatement | WriteStatement |Designator2 .
+                        | ReadStatement | WriteStatement  .
     ConstDeclarations = "const" OneConst { "," OneConst } ";" .
     OneConst          = identifier "=" Constant .
     Constant          =   number | charLit
@@ -40,7 +40,7 @@
     OneVar            = identifier [ "=" Expression ] .
     Assignment        = Designator "=" Expression  ";" .
     Designator        = identifier [ "[" Expression "]" ]  .
-	Designator2       = ("++"|"--") Designator | Designator ("++" | "--" ) ";" .
+	Designator2       = (("++"|"--") Designator | Designator ("++" | "--" )) ";" .
     IfStatement       = "if" "(" Condition ")" Statement .
     WhileStatement    = "while" "(" Condition ")" Statement .
     ReturnStatement   = "return" ";" .

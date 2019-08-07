@@ -4,9 +4,7 @@
    3     ++i;
    4     --i;
    5     i++;
-****      ^ ";" expected
    6     i--;
-****      ^ ";" expected
    7   } // Main
 
-2 errors detected
+0 errors detected

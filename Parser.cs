@@ -164,6 +164,8 @@ public class Parser {
 			Block();
 		} else if (la.kind == semicolon_Sym) {
 			Get();
+		} else if (la.kind == identifier_Sym || la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
+			Designator2();
 		} else if (la.kind == const_Sym) {
 			ConstDeclarations();
 		} else if (StartOf(2)) {
@@ -182,9 +184,26 @@ public class Parser {
 			ReadStatement();
 		} else if (la.kind == write_Sym) {
 			WriteStatement();
-		} else if (la.kind == identifier_Sym || la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
-			Designator2();
 		} else SynErr(45);
+	}
+
+	static void Designator2() {
+		if (la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
+			if (la.kind == plusplus_Sym) {
+				Get();
+			} else {
+				Get();
+			}
+			Designator();
+		} else if (la.kind == identifier_Sym) {
+			Designator();
+			if (la.kind == plusplus_Sym) {
+				Get();
+			} else if (la.kind == minusminus_Sym) {
+				Get();
+			} else SynErr(46);
+		} else SynErr(47);
+		Expect(semicolon_Sym);
 	}
 
 	static void ConstDeclarations() {
@@ -262,25 +281,6 @@ public class Parser {
 		}
 		Expect(rparen_Sym);
 		Expect(semicolon_Sym);
-	}
-
-	static void Designator2() {
-		if (la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
-			if (la.kind == plusplus_Sym) {
-				Get();
-			} else {
-				Get();
-			}
-			Designator();
-		} else if (la.kind == identifier_Sym) {
-			Designator();
-			if (la.kind == plusplus_Sym) {
-				Get();
-			} else if (la.kind == minusminus_Sym) {
-				Get();
-			} else SynErr(46);
-			Expect(semicolon_Sym);
-		} else SynErr(47);
 	}
 
 	static void OneConst() {
