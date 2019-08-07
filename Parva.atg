@@ -40,9 +40,9 @@
     OneVar            = identifier [ "=" Expression ] .
     Assignment        = Designator "=" Expression ";" .
     Designator        = identifier [ "[" Expression "]" ] .
-    IfStatement       = "if" "(" Condition ")" Statement .
-    WhileStatement    = "while" "(" Condition ")" Statement .
-    ReturnStatement   = "return" ";" .
+    IfStatement       = "if" "(" Condition ")" Statement ["else" Statement].
+	WhileStatement    = "while" "(" Condition ")" Statement .
+	ReturnStatement   = "return" ";" .
     HaltStatement     = "halt" ";" .
     ReadStatement     = "read" "(" ReadElement
                                    { "," ReadElement } ")" ";" .
@@ -60,6 +60,6 @@
     Type              = BasicType [ "[]" ] .
     BasicType         = "int" | "bool" .
     AddOp             = "+" | "-" | "||" .
-    MulOp             = "*" | "/" | "&&" .
+    MulOp             = "*" | "/" | "&&" | "%" .
     RelOp             = "==" | "!=" | "<" | "<=" | ">" | ">=" .
   END Parva.
