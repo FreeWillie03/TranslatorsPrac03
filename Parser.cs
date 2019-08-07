@@ -3,64 +3,26 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Parva {
+namespace Trains {
 
 public class Parser {
 	public const int _EOF = 0;
-	public const int _identifier = 1;
-	public const int _number = 2;
-	public const int _stringLit = 3;
-	public const int _charLit = 4;
 	// terminals
 	public const int EOF_SYM = 0;
-	public const int identifier_Sym = 1;
-	public const int number_Sym = 2;
-	public const int stringLit_Sym = 3;
-	public const int charLit_Sym = 4;
-	public const int void_Sym = 5;
-	public const int lparen_Sym = 6;
-	public const int rparen_Sym = 7;
-	public const int lbrace_Sym = 8;
-	public const int rbrace_Sym = 9;
-	public const int semicolon_Sym = 10;
-	public const int const_Sym = 11;
-	public const int comma_Sym = 12;
-	public const int equal_Sym = 13;
-	public const int true_Sym = 14;
-	public const int false_Sym = 15;
-	public const int null_Sym = 16;
-	public const int lbrack_Sym = 17;
-	public const int rbrack_Sym = 18;
-	public const int if_Sym = 19;
-	public const int else_Sym = 20;
-	public const int while_Sym = 21;
-	public const int do_Sym = 22;
-	public const int return_Sym = 23;
-	public const int halt_Sym = 24;
-	public const int read_Sym = 25;
-	public const int write_Sym = 26;
-	public const int plus_Sym = 27;
-	public const int minus_Sym = 28;
-	public const int new_Sym = 29;
-	public const int bang_Sym = 30;
-	public const int lbrackrbrack_Sym = 31;
-	public const int int_Sym = 32;
-	public const int bool_Sym = 33;
-	public const int barbar_Sym = 34;
-	public const int star_Sym = 35;
-	public const int slash_Sym = 36;
-	public const int andand_Sym = 37;
-	public const int percent_Sym = 38;
-	public const int equalequal_Sym = 39;
-	public const int bangequal_Sym = 40;
-	public const int less_Sym = 41;
-	public const int lessequal_Sym = 42;
-	public const int greater_Sym = 43;
-	public const int greaterequal_Sym = 44;
-	public const int NOT_SYM = 45;
+	public const int point_Sym = 1;
+	public const int loco_Sym = 2;
+	public const int brake_Sym = 3;
+	public const int coach_Sym = 4;
+	public const int guard_Sym = 5;
+	public const int coal_Sym = 6;
+	public const int closed_Sym = 7;
+	public const int open_Sym = 8;
+	public const int cattle_Sym = 9;
+	public const int fuel_Sym = 10;
+	public const int NOT_SYM = 11;
 	// pragmas
 
-	public const int maxT = 45;
+	public const int maxT = 11;
 
 	const bool T = true;
 	const bool x = false;
@@ -144,341 +106,62 @@ public class Parser {
 		}
 	}
 
-	static void Parva() {
-		Expect(void_Sym);
-		Expect(identifier_Sym);
-		Expect(lparen_Sym);
-		Expect(rparen_Sym);
-		Block();
+	static void Trains() {
+		while (la.kind == loco_Sym) {
+			OneTrain();
+		}
+		Expect(EOF_SYM);
 	}
 
-	static void Block() {
-		Expect(lbrace_Sym);
-		while (StartOf(1)) {
-			Statement();
+	static void OneTrain() {
+		LocoPart();
+		if (StartOf(1)) {
+			if (StartOf(2)) {
+				GoodsPart();
+			}
+			HumanPart();
 		}
-		Expect(rbrace_Sym);
+		while (!(la.kind == EOF_SYM || la.kind == point_Sym)) {SynErr(12); Get();}
+		Expect(point_Sym);
 	}
 
-	static void Statement() {
-		switch (la.kind) {
-		case lbrace_Sym: {
-			Block();
-			break;
-		}
-		case semicolon_Sym: {
-			Get();
-			break;
-		}
-		case const_Sym: {
-			ConstDeclarations();
-			break;
-		}
-		case int_Sym: case bool_Sym: {
-			VarDeclarations();
-			break;
-		}
-		case identifier_Sym: {
-			Assignment();
-			break;
-		}
-		case if_Sym: {
-			IfStatement();
-			break;
-		}
-		case while_Sym: {
-			WhileStatement();
-			break;
-		}
-		case return_Sym: {
-			ReturnStatement();
-			break;
-		}
-		case halt_Sym: {
-			HaltStatement();
-			break;
-		}
-		case read_Sym: {
-			ReadStatement();
-			break;
-		}
-		case write_Sym: {
-			WriteStatement();
-			break;
-		}
-		case do_Sym: {
-			DoWhileStatment();
-			break;
-		}
-		default: SynErr(46); break;
-		}
-	}
-
-	static void ConstDeclarations() {
-		Expect(const_Sym);
-		OneConst();
-		while (la.kind == comma_Sym) {
-			Get();
-			OneConst();
-		}
-		Expect(semicolon_Sym);
-	}
-
-	static void VarDeclarations() {
-		Type();
-		OneVar();
-		while (la.kind == comma_Sym) {
-			Get();
-			OneVar();
-		}
-		Expect(semicolon_Sym);
-	}
-
-	static void Assignment() {
-		Designator();
-		Expect(equal_Sym);
-		Expression();
-		Expect(semicolon_Sym);
-	}
-
-	static void IfStatement() {
-		Expect(if_Sym);
-		Expect(lparen_Sym);
-		Condition();
-		Expect(rparen_Sym);
-		Statement();
-		if (la.kind == else_Sym) {
-			Get();
-			Statement();
-		}
-	}
-
-	static void WhileStatement() {
-		Expect(while_Sym);
-		Expect(lparen_Sym);
-		Condition();
-		Expect(rparen_Sym);
-		Statement();
-	}
-
-	static void ReturnStatement() {
-		Expect(return_Sym);
-		Expect(semicolon_Sym);
-	}
-
-	static void HaltStatement() {
-		Expect(halt_Sym);
-		Expect(semicolon_Sym);
-	}
-
-	static void ReadStatement() {
-		Expect(read_Sym);
-		Expect(lparen_Sym);
-		ReadElement();
-		while (la.kind == comma_Sym) {
-			Get();
-			ReadElement();
-		}
-		Expect(rparen_Sym);
-		Expect(semicolon_Sym);
-	}
-
-	static void WriteStatement() {
-		Expect(write_Sym);
-		Expect(lparen_Sym);
-		WriteElement();
-		while (la.kind == comma_Sym) {
-			Get();
-			WriteElement();
-		}
-		Expect(rparen_Sym);
-		Expect(semicolon_Sym);
-	}
-
-	static void DoWhileStatment() {
-		Expect(do_Sym);
-		Statement();
-		Expect(while_Sym);
-		Expect(lparen_Sym);
-		Condition();
-		Expect(rparen_Sym);
-		Expect(semicolon_Sym);
-	}
-
-	static void OneConst() {
-		Expect(identifier_Sym);
-		Expect(equal_Sym);
-		Constant();
-	}
-
-	static void Constant() {
-		if (la.kind == number_Sym) {
-			Get();
-		} else if (la.kind == charLit_Sym) {
-			Get();
-		} else if (la.kind == true_Sym) {
-			Get();
-		} else if (la.kind == false_Sym) {
-			Get();
-		} else if (la.kind == null_Sym) {
-			Get();
-		} else SynErr(47);
-	}
-
-	static void Type() {
-		BasicType();
-		if (la.kind == lbrackrbrack_Sym) {
+	static void LocoPart() {
+		Expect(loco_Sym);
+		while (la.kind == loco_Sym) {
 			Get();
 		}
 	}
 
-	static void OneVar() {
-		Expect(identifier_Sym);
-		if (la.kind == equal_Sym) {
-			Get();
-			Expression();
+	static void GoodsPart() {
+		Truck();
+		while (StartOf(2)) {
+			Truck();
 		}
 	}
 
-	static void Expression() {
-		AddExp();
-		if (StartOf(2)) {
-			RelOp();
-			AddExp();
-		}
-	}
-
-	static void Designator() {
-		Expect(identifier_Sym);
-		if (la.kind == lbrack_Sym) {
+	static void HumanPart() {
+		if (la.kind == brake_Sym) {
 			Get();
-			Expression();
-			Expect(rbrack_Sym);
-		}
-	}
-
-	static void Condition() {
-		Expression();
-	}
-
-	static void ReadElement() {
-		if (la.kind == stringLit_Sym) {
-			Get();
-		} else if (la.kind == identifier_Sym) {
-			Designator();
-		} else SynErr(48);
-	}
-
-	static void WriteElement() {
-		if (la.kind == stringLit_Sym) {
-			Get();
-		} else if (StartOf(3)) {
-			Expression();
-		} else SynErr(49);
-	}
-
-	static void AddExp() {
-		if (la.kind == plus_Sym || la.kind == minus_Sym) {
-			if (la.kind == plus_Sym) {
-				Get();
-			} else {
+		} else if (la.kind == coach_Sym || la.kind == guard_Sym) {
+			while (la.kind == coach_Sym) {
 				Get();
 			}
-		}
-		Term();
-		while (la.kind == plus_Sym || la.kind == minus_Sym || la.kind == barbar_Sym) {
-			AddOp();
-			Term();
-		}
+			Expect(guard_Sym);
+		} else SynErr(13);
 	}
 
-	static void RelOp() {
-		switch (la.kind) {
-		case equalequal_Sym: {
+	static void Truck() {
+		if (la.kind == coal_Sym) {
 			Get();
-			break;
-		}
-		case bangequal_Sym: {
+		} else if (la.kind == closed_Sym) {
 			Get();
-			break;
-		}
-		case less_Sym: {
+		} else if (la.kind == open_Sym) {
 			Get();
-			break;
-		}
-		case lessequal_Sym: {
+		} else if (la.kind == cattle_Sym) {
 			Get();
-			break;
-		}
-		case greater_Sym: {
+		} else if (la.kind == fuel_Sym) {
 			Get();
-			break;
-		}
-		case greaterequal_Sym: {
-			Get();
-			break;
-		}
-		default: SynErr(50); break;
-		}
-	}
-
-	static void Term() {
-		Factor();
-		while (StartOf(4)) {
-			MulOp();
-			Factor();
-		}
-	}
-
-	static void AddOp() {
-		if (la.kind == plus_Sym) {
-			Get();
-		} else if (la.kind == minus_Sym) {
-			Get();
-		} else if (la.kind == barbar_Sym) {
-			Get();
-		} else SynErr(51);
-	}
-
-	static void Factor() {
-		if (la.kind == identifier_Sym) {
-			Designator();
-		} else if (StartOf(5)) {
-			Constant();
-		} else if (la.kind == new_Sym) {
-			Get();
-			BasicType();
-			Expect(lbrack_Sym);
-			Expression();
-			Expect(rbrack_Sym);
-		} else if (la.kind == bang_Sym) {
-			Get();
-			Factor();
-		} else if (la.kind == lparen_Sym) {
-			Get();
-			Expression();
-			Expect(rparen_Sym);
-		} else SynErr(52);
-	}
-
-	static void MulOp() {
-		if (la.kind == star_Sym) {
-			Get();
-		} else if (la.kind == slash_Sym) {
-			Get();
-		} else if (la.kind == andand_Sym) {
-			Get();
-		} else if (la.kind == percent_Sym) {
-			Get();
-		} else SynErr(53);
-	}
-
-	static void BasicType() {
-		if (la.kind == int_Sym) {
-			Get();
-		} else if (la.kind == bool_Sym) {
-			Get();
-		} else SynErr(54);
+		} else SynErr(14);
 	}
 
 
@@ -487,18 +170,15 @@ public class Parser {
 		la = new Token();
 		la.val = "";
 		Get();
-		Parva();
+		Trains();
 		Expect(EOF_SYM);
 
 	}
 
 	static bool[,] set = {
-		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,x,x, x,x,x,x, T,x,T,T, x,x,x,x, x,x,x,T, x,T,T,T, T,T,T,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,x,x},
-		{x,T,T,x, T,x,T,x, x,x,x,x, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x,x,x,x, x,x,x},
-		{x,x,T,x, T,x,x,x, x,x,x,x, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x}
+		{T,T,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,T, T,T,T,T, T,T,T,x, x},
+		{x,x,x,x, x,x,T,T, T,T,T,x, x}
 
 	};
 
@@ -611,60 +291,20 @@ public class Errors {
 		string s;
 		switch (n) {
 			case 0: s = "EOF expected"; break;
-			case 1: s = "identifier expected"; break;
-			case 2: s = "number expected"; break;
-			case 3: s = "stringLit expected"; break;
-			case 4: s = "charLit expected"; break;
-			case 5: s = "\"void\" expected"; break;
-			case 6: s = "\"(\" expected"; break;
-			case 7: s = "\")\" expected"; break;
-			case 8: s = "\"{\" expected"; break;
-			case 9: s = "\"}\" expected"; break;
-			case 10: s = "\";\" expected"; break;
-			case 11: s = "\"const\" expected"; break;
-			case 12: s = "\",\" expected"; break;
-			case 13: s = "\"=\" expected"; break;
-			case 14: s = "\"true\" expected"; break;
-			case 15: s = "\"false\" expected"; break;
-			case 16: s = "\"null\" expected"; break;
-			case 17: s = "\"[\" expected"; break;
-			case 18: s = "\"]\" expected"; break;
-			case 19: s = "\"if\" expected"; break;
-			case 20: s = "\"else\" expected"; break;
-			case 21: s = "\"while\" expected"; break;
-			case 22: s = "\"do\" expected"; break;
-			case 23: s = "\"return\" expected"; break;
-			case 24: s = "\"halt\" expected"; break;
-			case 25: s = "\"read\" expected"; break;
-			case 26: s = "\"write\" expected"; break;
-			case 27: s = "\"+\" expected"; break;
-			case 28: s = "\"-\" expected"; break;
-			case 29: s = "\"new\" expected"; break;
-			case 30: s = "\"!\" expected"; break;
-			case 31: s = "\"[]\" expected"; break;
-			case 32: s = "\"int\" expected"; break;
-			case 33: s = "\"bool\" expected"; break;
-			case 34: s = "\"||\" expected"; break;
-			case 35: s = "\"*\" expected"; break;
-			case 36: s = "\"/\" expected"; break;
-			case 37: s = "\"&&\" expected"; break;
-			case 38: s = "\"%\" expected"; break;
-			case 39: s = "\"==\" expected"; break;
-			case 40: s = "\"!=\" expected"; break;
-			case 41: s = "\"<\" expected"; break;
-			case 42: s = "\"<=\" expected"; break;
-			case 43: s = "\">\" expected"; break;
-			case 44: s = "\">=\" expected"; break;
-			case 45: s = "??? expected"; break;
-			case 46: s = "invalid Statement"; break;
-			case 47: s = "invalid Constant"; break;
-			case 48: s = "invalid ReadElement"; break;
-			case 49: s = "invalid WriteElement"; break;
-			case 50: s = "invalid RelOp"; break;
-			case 51: s = "invalid AddOp"; break;
-			case 52: s = "invalid Factor"; break;
-			case 53: s = "invalid MulOp"; break;
-			case 54: s = "invalid BasicType"; break;
+			case 1: s = "\".\" expected"; break;
+			case 2: s = "\"loco\" expected"; break;
+			case 3: s = "\"brake\" expected"; break;
+			case 4: s = "\"coach\" expected"; break;
+			case 5: s = "\"guard\" expected"; break;
+			case 6: s = "\"coal\" expected"; break;
+			case 7: s = "\"closed\" expected"; break;
+			case 8: s = "\"open\" expected"; break;
+			case 9: s = "\"cattle\" expected"; break;
+			case 10: s = "\"fuel\" expected"; break;
+			case 11: s = "??? expected"; break;
+			case 12: s = "this symbol not expected in OneTrain"; break;
+			case 13: s = "invalid HumanPart"; break;
+			case 14: s = "invalid Truck"; break;
 
 			default: s = "error " + n; break;
 		}
