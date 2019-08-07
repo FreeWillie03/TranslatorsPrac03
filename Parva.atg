@@ -31,15 +31,16 @@
                         | ConstDeclarations | VarDeclarations
                         | Assignment | IfStatement | WhileStatement
                         | ReturnStatement | HaltStatement
-                        | ReadStatement | WriteStatement .
+                        | ReadStatement | WriteStatement |Designator2 .
     ConstDeclarations = "const" OneConst { "," OneConst } ";" .
     OneConst          = identifier "=" Constant .
     Constant          =   number | charLit
                         | "true" | "false" | "null" .
     VarDeclarations   = Type OneVar { "," OneVar } ";" .
     OneVar            = identifier [ "=" Expression ] .
-    Assignment        = Designator "=" Expression ";" .
-    Designator        = identifier [ "[" Expression "]" ] .
+    Assignment        = Designator "=" Expression  ";" .
+    Designator        = identifier [ "[" Expression "]" ]  .
+	Designator2       = ("++"|"--") Designator | Designator ("++" | "--" ) ";" .
     IfStatement       = "if" "(" Condition ")" Statement .
     WhileStatement    = "while" "(" Condition ")" Statement .
     ReturnStatement   = "return" ";" .
@@ -58,7 +59,7 @@
                         | "new" BasicType "[" Expression "]"
                         | "!" Factor | "(" Expression ")" .
     Type              = BasicType [ "[]" ] .
-    BasicType         = "int" | "bool" .
+    BasicType         = "int" | "bool" |.
     AddOp             = "+" | "-" | "||" .
     MulOp             = "*" | "/" | "&&" .
     RelOp             = "==" | "!=" | "<" | "<=" | ">" | ">=" .
